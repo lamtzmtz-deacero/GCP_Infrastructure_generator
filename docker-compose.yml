@@ -1,0 +1,14 @@
+services:
+  terraform:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    volumes:
+      - ..:/app
+      - ${GOOGLE_CREDENTIALS}:/app/credentials/credentials.json:ro
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials/credentials.json
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID}
+      - GCP_REGION=${GCP_REGION}
+      - GCP_ZONE=${GCP_ZONE}
+    command: ["apply"]

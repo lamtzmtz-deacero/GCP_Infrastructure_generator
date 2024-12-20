@@ -1,0 +1,10 @@
+# Credenciales
+credentials/*.json
+!credentials/service-account-template.json
+!credentials/README.md 
+
+# Entorno
+.env
+
+# GCP
+service-account-template.json

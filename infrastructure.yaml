@@ -1,0 +1,24 @@
+machines:
+  - name: vm-1
+    machine_type: e2-medium
+    zone: us-central1-a
+    network: default
+    boot_disk:
+      image: debian-cloud/debian-11
+      size_gb: 20
+    
+  - name: vm-2
+    machine_type: e2-small
+    zone: us-central1-a
+    network: custom-network
+    boot_disk:
+      image: debian-cloud/debian-11
+      size_gb: 10
+
+networks:
+  - name: custom-network
+    auto_create_subnetworks: false
+    subnets:
+      - name: subnet-1
+        region: us-central1
+        cidr: 10.0.0.0/24

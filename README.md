@@ -1,117 +1,84 @@
 # Despliegue de Infraestructura en GCP con Terraform y Docker
 
-Este proyecto automatiza el despliegue de infraestructura en Google Cloud Platform (GCP) utilizando Terraform como herramienta de Infrastructure as Code (IaC). Todo el proceso se ejecuta dentro de contenedores Docker para garantizar un entorno consistente y reproducible.
+## Descripción
+Este proyecto automatiza el despliegue de máquinas virtuales y redes en Google Cloud Platform (GCP) utilizando Terraform. La infraestructura se define en archivos YAML y se despliega a través de contenedores Docker usando Docker Compose.
 
-## Descripción General
+## Características
 
-El proyecto permite desplegar recursos en GCP de forma automatizada mediante archivos de configuración de Terraform. Utiliza una cuenta de servicio de GCP previamente configurada para autenticar y autorizar las operaciones.
+- Despliegue automatizado de VMs en GCP usando Terraform
+- Configuración de redes y subredes
+- Gestión de credenciales segura usando cuenta de servicio de GCP
+- Infraestructura como código usando archivos YAML
+- Contenerización del proceso usando Docker y Docker Compose
 
-## Requisitos Previos
+## Prerequisitos
 
-- Docker y Docker Compose instalados en la máquina local
-- Una cuenta de GCP activa 
-- Una cuenta de servicio de GCP con los siguientes permisos:
-  - Compute Admin
-  - Service Account User
-  - Project IAM Admin
-- Archivo de credenciales JSON de la cuenta de servicio
+- Cuenta de GCP activa
+- Cuenta de servicio de GCP con los siguientes permisos:
+    - Compute Admin
+    - Network Admin
+    - Service Account User
+- Archivo de credenciales de la cuenta de servicio (.json)
+- Docker y Docker Compose instalados
+- Terraform CLI instalado (opcional, se ejecutará desde el contenedor)
 
 ## Estructura del Proyecto
 
     .
-    ├── docker/                  # Archivos relacionados con Docker
-    │   ├── Dockerfile          # Definición de la imagen Docker
-    │   └── docker-compose.yml  # Configuración de servicios
-    ├── terraform/              # Archivos de configuración de Terraform
-    │   ├── main.tf            # Configuración principal de recursos
-    │   ├── variables.tf       # Definición de variables
-    │   └── outputs.tf         # Definición de salidas
-    ├── credentials/           # Directorio para credenciales (ignorado por git)
-    │   └── gcp-credentials.json
-    └── scripts/              # Scripts de utilidad
-        └── deploy.sh         # Script de despliegue
+    ├── README.md
+    ├── docker/
+    │   ├── Dockerfile         # Imagen con Terraform y dependencias
+    │   └── docker-compose.yml # Configuración de servicios
+    ├── infrastructure.yaml    # Definición de infraestructura
+    ├── src/                   # Código fuente
+    ├── .env.example          # Variables de entorno de ejemplo
+    └── .gitignore
 
-## Configuración Inicial
+## Configuración
 
-1. **Preparar Credenciales GCP**:
-   ```bash
-   # Crear directorio de credenciales
-   mkdir -p credentials
-   
-   # Copiar archivo de credenciales
-   cp /ruta/a/tu/credencial.json credentials/gcp-credentials.json
-   ```
+1. Copia el archivo `.env.example` a `.env` y configura las variables:
+```plaintext
+    GCP_PROJECT_ID=tu-proyecto-id
+    GCP_REGION=tu-region
+    GCP_ZONE=tu-zona
+    GOOGLE_CREDENTIALS=/path/to/service-account.json
+```
+2. Coloca tu archivo de credenciales de la cuenta de servicio en la ubicación especificada
 
-2. **Configurar Variables de Entorno**:
-   ```bash
-   # Copiar archivo de ejemplo
-   cp .env.example .env
-   
-   # Editar variables
-   nano .env
-   ```
+3. Define tu infraestructura en el archivo `infrastructure.yaml`:
+    ```yaml
+    machines:
+      - name: vm-1
+        machine_type: e2-medium
+        zone: us-central1-a
+        network: default
+        
+    networks:
+      - name: custom-network
+        auto_create_subnetworks: false
+        subnets:
+          - name: subnet-1
+            region: us-central1
+            cidr: 10.0.0.0/24    ```
 
 ## Uso
 
-1. **Construir y Levantar Contenedores**:
-   ```bash
-   docker-compose up --build
-   ```
+1. Inicia el despliegue:    ```bash
+    docker compose up    ```
 
-2. **Inicializar Terraform**:
-   ```bash
-   docker-compose exec terraform init
-   ```
+2. Para destruir la infraestructura:    ```bash
+    docker compose run terraform destroy    ```
 
-3. **Planear Despliegue**:
-   ```bash
-   docker-compose exec terraform plan
-   ```
+## Notas de Seguridad
 
-4. **Aplicar Cambios**:
-   ```bash
-   docker-compose exec terraform apply
-   ```
+- Nunca compartas o subas al control de versiones tu archivo de credenciales
+- Utiliza variables de entorno para información sensible
+- Asegúrate de que la cuenta de servicio tenga los permisos mínimos necesarios
 
-## Variables de Configuración
+## Contribuciones
 
-Las siguientes variables pueden ser configuradas a través de variables de entorno o en el archivo .env:
-
-```
-PROJECT_ID=mi-proyecto-gcp
-REGION=us-central1
-ZONE=us-central1-a
-MACHINE_TYPE=e2-medium
-INSTANCE_NAME=mi-instancia
-```
-
-## Seguridad
-
-- Las credenciales sensibles se almacenan localmente y nunca se suben al control de versiones
-- Los archivos de credenciales requieren permisos restrictivos (600)
-- Se utilizan variables de entorno para la configuración sensible
-- La cuenta de servicio tiene permisos mínimos necesarios
-
-## Solución de Problemas
-
-1. **Error de Autenticación**:
-   - Verificar que el archivo de credenciales existe y tiene los permisos correctos
-   - Confirmar que la cuenta de servicio tiene los permisos necesarios
-   - Validar que las variables de entorno están configuradas correctamente
-
-2. **Error en el Despliegue**:
-   - Revisar los logs de Terraform para identificar el problema
-   - Verificar que las variables de entorno son correctas
-   - Comprobar conectividad con GCP
-
-## Contribuir
-
-1. Fork del repositorio
-2. Crear una rama para tu feature
-3. Commit de tus cambios
-4. Push a la rama
-5. Crear un Pull Request
+Las contribuciones son bienvenidas. Por favor, abre un issue primero para discutir los cambios que te gustaría realizar.
 
 ## Licencia
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo LICENSE para más detalles.
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
